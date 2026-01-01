@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { contentApi } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { Save, Loader2 } from 'lucide-react';
+import { Save, Loader2, Type, MousePointer, CheckCircle } from 'lucide-react';
 
 export default function HeroEditor() {
   const [data, setData] = useState<any>(null);
@@ -48,40 +48,48 @@ export default function HeroEditor() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-[hsl(var(--primary))] border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[hsl(var(--foreground))]">Hero Section</h1>
-          <p className="text-[hsl(var(--muted-foreground))]">Edit the hero section of your landing page</p>
-        </div>
-        {message && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium ${
-              message.includes('success')
-                ? 'bg-green-500/10 text-green-600'
-                : 'bg-red-500/10 text-red-600'
-            }`}
-          >
-            {message}
-          </motion.div>
-        )}
-      </div>
+    <div className="space-y-6 max-w-4xl">
+      {/* Success Message */}
+      {message && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium ${
+            message.includes('success')
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+              : 'bg-red-50 text-red-700 border border-red-200'
+          }`}
+        >
+          <CheckCircle className="w-5 h-5" />
+          {message}
+        </motion.div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Badge & Title */}
-        <div className="bg-[hsl(var(--card))] rounded-xl p-6 border border-[hsl(var(--border))]">
-          <h2 className="text-lg font-semibold mb-4 text-[hsl(var(--foreground))]">Title & Badge</h2>
-          <div className="grid gap-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-xl bg-indigo-100">
+              <Type className="w-5 h-5 text-indigo-600" />
+            </div>
             <div>
-              <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-2">
+              <h2 className="text-lg font-bold text-slate-800">Title & Badge</h2>
+              <p className="text-sm text-slate-500">Main heading content</p>
+            </div>
+          </div>
+          <div className="grid gap-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Badge Text
               </label>
               <input
@@ -89,13 +97,13 @@ export default function HeroEditor() {
                 name="badge_text"
                 value={data?.badge_text || ''}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                 placeholder="e.g., 🌺 Peluang Kemitraan"
               />
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Title
                 </label>
                 <input
@@ -103,26 +111,26 @@ export default function HeroEditor() {
                   name="title"
                   value={data?.title || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                   placeholder="Main title"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-2">
-                  Title Highlight
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Subtitle
                 </label>
                 <input
                   type="text"
-                  name="title_highlight"
-                  value={data?.title_highlight || ''}
+                  name="subtitle"
+                  value={data?.subtitle || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent"
-                  placeholder="Highlighted text"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                  placeholder="Subtitle text"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Description
               </label>
               <textarea
@@ -130,152 +138,108 @@ export default function HeroEditor() {
                 value={data?.description || ''}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-4 py-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent resize-none"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none"
                 placeholder="Hero description"
               />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Buttons */}
-        <div className="bg-[hsl(var(--card))] rounded-xl p-6 border border-[hsl(var(--border))]">
-          <h2 className="text-lg font-semibold mb-4 text-[hsl(var(--foreground))]">Buttons</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-2">
-                Primary Button Text
-              </label>
-              <input
-                type="text"
-                name="button_primary_text"
-                value={data?.button_primary_text || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent"
-              />
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-xl bg-emerald-100">
+              <MousePointer className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-2">
-                Primary Button Link
-              </label>
-              <input
-                type="text"
-                name="button_primary_link"
-                value={data?.button_primary_link || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-2">
-                Secondary Button Text
-              </label>
-              <input
-                type="text"
-                name="button_secondary_text"
-                value={data?.button_secondary_text || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-2">
-                Secondary Button Link
-              </label>
-              <input
-                type="text"
-                name="button_secondary_link"
-                value={data?.button_secondary_link || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent"
-              />
+              <h2 className="text-lg font-bold text-slate-800">Call to Action Buttons</h2>
+              <p className="text-sm text-slate-500">Configure action buttons</p>
             </div>
           </div>
-        </div>
-
-        {/* Stats */}
-        <div className="bg-[hsl(var(--card))] rounded-xl p-6 border border-[hsl(var(--border))]">
-          <h2 className="text-lg font-semibold mb-4 text-[hsl(var(--foreground))]">Statistics</h2>
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-[hsl(var(--foreground))]">Stat 1</label>
-              <input
-                type="text"
-                name="stat_1_value"
-                value={data?.stat_1_value || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
-                placeholder="Value (e.g., 4+)"
-              />
-              <input
-                type="text"
-                name="stat_1_label"
-                value={data?.stat_1_label || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
-                placeholder="Label"
-              />
+          <div className="grid md:grid-cols-2 gap-5">
+            <div className="space-y-4 p-4 rounded-xl bg-indigo-50/50 border border-indigo-100">
+              <p className="text-sm font-semibold text-indigo-700">Primary Button</p>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Text</label>
+                <input
+                  type="text"
+                  name="primary_button_text"
+                  value={data?.primary_button_text || ''}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                  placeholder="Button text"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Link</label>
+                <input
+                  type="text"
+                  name="primary_button_link"
+                  value={data?.primary_button_link || ''}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                  placeholder="#contact"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-[hsl(var(--foreground))]">Stat 2</label>
-              <input
-                type="text"
-                name="stat_2_value"
-                value={data?.stat_2_value || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
-                placeholder="Value"
-              />
-              <input
-                type="text"
-                name="stat_2_label"
-                value={data?.stat_2_label || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
-                placeholder="Label"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-[hsl(var(--foreground))]">Stat 3</label>
-              <input
-                type="text"
-                name="stat_3_value"
-                value={data?.stat_3_value || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
-                placeholder="Value"
-              />
-              <input
-                type="text"
-                name="stat_3_label"
-                value={data?.stat_3_label || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
-                placeholder="Label"
-              />
+            <div className="space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+              <p className="text-sm font-semibold text-slate-700">Secondary Button</p>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Text</label>
+                <input
+                  type="text"
+                  name="secondary_button_text"
+                  value={data?.secondary_button_text || ''}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                  placeholder="Button text"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Link</label>
+                <input
+                  type="text"
+                  name="secondary_button_link"
+                  value={data?.secondary_button_link || ''}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                  placeholder="#services"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Save Button */}
-        <div className="flex justify-end">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex justify-end pt-4"
+        >
           <button
             type="submit"
             disabled={isSaving}
-            className="px-6 py-3 bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--accent))] text-white font-medium rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-indigo-600 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-indigo-500/30"
           >
             {isSaving ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Saving...
+                Menyimpan...
               </>
             ) : (
               <>
                 <Save className="w-5 h-5" />
-                Save Changes
+                Simpan Perubahan
               </>
             )}
           </button>
-        </div>
+        </motion.div>
       </form>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { contentApi } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { Save, Loader2 } from 'lucide-react';
+import { Save, Loader2, FileText, Sparkles, BarChart3, CheckCircle } from 'lucide-react';
 
 export default function AboutEditor() {
   const [data, setData] = useState<any>(null);
@@ -48,7 +48,7 @@ export default function AboutEditor() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-[hsl(var(--primary))] border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -60,35 +60,50 @@ export default function AboutEditor() {
     descKey: `feature_${num}_description`,
   }));
 
+  const featureColors = [
+    { bg: 'bg-indigo-50', border: 'border-indigo-100', text: 'text-indigo-700' },
+    { bg: 'bg-emerald-50', border: 'border-emerald-100', text: 'text-emerald-700' },
+    { bg: 'bg-amber-50', border: 'border-amber-100', text: 'text-amber-700' },
+    { bg: 'bg-rose-50', border: 'border-rose-100', text: 'text-rose-700' },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[hsl(var(--foreground))]">About Section</h1>
-          <p className="text-[hsl(var(--muted-foreground))]">Edit the about section of your landing page</p>
-        </div>
-        {message && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium ${
-              message.includes('success')
-                ? 'bg-green-500/10 text-green-600'
-                : 'bg-red-500/10 text-red-600'
-            }`}
-          >
-            {message}
-          </motion.div>
-        )}
-      </div>
+    <div className="space-y-6 max-w-4xl">
+      {/* Success Message */}
+      {message && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium ${
+            message.includes('success')
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+              : 'bg-red-50 text-red-700 border border-red-200'
+          }`}
+        >
+          <CheckCircle className="w-5 h-5" />
+          {message}
+        </motion.div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title Section */}
-        <div className="bg-[hsl(var(--card))] rounded-xl p-6 border border-[hsl(var(--border))]">
-          <h2 className="text-lg font-semibold mb-4 text-[hsl(var(--foreground))]">Title & Description</h2>
-          <div className="grid gap-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-xl bg-indigo-100">
+              <FileText className="w-5 h-5 text-indigo-600" />
+            </div>
             <div>
-              <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-2">
+              <h2 className="text-lg font-bold text-slate-800">Title & Description</h2>
+              <p className="text-sm text-slate-500">Section header content</p>
+            </div>
+          </div>
+          <div className="grid gap-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Section Label
               </label>
               <input
@@ -96,12 +111,12 @@ export default function AboutEditor() {
                 name="section_label"
                 value={data?.section_label || ''}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
               />
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Title
                 </label>
                 <input
@@ -109,11 +124,11 @@ export default function AboutEditor() {
                   name="title"
                   value={data?.title || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Title Highlight
                 </label>
                 <input
@@ -121,12 +136,12 @@ export default function AboutEditor() {
                   name="title_highlight"
                   value={data?.title_highlight || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Description
               </label>
               <textarea
@@ -134,105 +149,147 @@ export default function AboutEditor() {
                 value={data?.description || ''}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-4 py-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] resize-none"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none"
               />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Features */}
-        <div className="bg-[hsl(var(--card))] rounded-xl p-6 border border-[hsl(var(--border))]">
-          <h2 className="text-lg font-semibold mb-4 text-[hsl(var(--foreground))]">Features</h2>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-xl bg-emerald-100">
+              <Sparkles className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-800">Features</h2>
+              <p className="text-sm text-slate-500">Highlight key features</p>
+            </div>
+          </div>
           <div className="grid md:grid-cols-2 gap-4">
-            {featureFields.map(({ num, iconKey, titleKey, descKey }) => (
-              <div key={num} className="p-4 rounded-lg bg-[hsl(var(--muted)/0.5)] border border-[hsl(var(--border))]">
-                <h3 className="font-medium mb-3 text-[hsl(var(--foreground))]">Feature {num}</h3>
+            {featureFields.map(({ num, iconKey, titleKey, descKey }, index) => (
+              <div 
+                key={num} 
+                className={`p-4 rounded-xl ${featureColors[index].bg} border ${featureColors[index].border}`}
+              >
+                <p className={`text-sm font-semibold ${featureColors[index].text} mb-3`}>Feature {num}</p>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs text-[hsl(var(--muted-foreground))] mb-1">Icon (emoji)</label>
+                    <label className="block text-xs text-slate-500 mb-1">Icon (emoji)</label>
                     <input
                       type="text"
                       name={iconKey}
                       value={data?.[iconKey] || ''}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                       placeholder="💡"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-[hsl(var(--muted-foreground))] mb-1">Title</label>
+                    <label className="block text-xs text-slate-500 mb-1">Title</label>
                     <input
                       type="text"
                       name={titleKey}
                       value={data?.[titleKey] || ''}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-[hsl(var(--muted-foreground))] mb-1">Description</label>
+                    <label className="block text-xs text-slate-500 mb-1">Description</label>
                     <input
                       type="text"
                       name={descKey}
                       value={data?.[descKey] || ''}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                     />
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Card Stats */}
-        <div className="bg-[hsl(var(--card))] rounded-xl p-6 border border-[hsl(var(--border))]">
-          <h2 className="text-lg font-semibold mb-4 text-[hsl(var(--foreground))]">Card Statistics</h2>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-xl bg-amber-100">
+              <BarChart3 className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-800">Card Statistics</h2>
+              <p className="text-sm text-slate-500">Numbers that matter</p>
+            </div>
+          </div>
           <div className="grid md:grid-cols-3 gap-4">
             {[1, 2, 3].map((num) => (
-              <div key={num} className="space-y-2">
-                <label className="block text-sm font-medium text-[hsl(var(--foreground))]">Stat {num}</label>
-                <input
-                  type="text"
-                  name={`card_stat_${num}_value`}
-                  value={data?.[`card_stat_${num}_value`] || ''}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
-                  placeholder="Value"
-                />
-                <input
-                  type="text"
-                  name={`card_stat_${num}_label`}
-                  value={data?.[`card_stat_${num}_label`] || ''}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
-                  placeholder="Label"
-                />
+              <div key={num} className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Stat {num}</label>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Value</label>
+                    <input
+                      type="text"
+                      name={`card_stat_${num}_value`}
+                      value={data?.[`card_stat_${num}_value`] || ''}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                      placeholder="e.g., 100+"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Label</label>
+                    <input
+                      type="text"
+                      name={`card_stat_${num}_label`}
+                      value={data?.[`card_stat_${num}_label`] || ''}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                      placeholder="Description"
+                    />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Save Button */}
-        <div className="flex justify-end">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="flex justify-end pt-4"
+        >
           <button
             type="submit"
             disabled={isSaving}
-            className="px-6 py-3 bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--accent))] text-white font-medium rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-indigo-600 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-indigo-500/30"
           >
             {isSaving ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Saving...
+                Menyimpan...
               </>
             ) : (
               <>
                 <Save className="w-5 h-5" />
-                Save Changes
+                Simpan Perubahan
               </>
             )}
           </button>
-        </div>
+        </motion.div>
       </form>
     </div>
   );
