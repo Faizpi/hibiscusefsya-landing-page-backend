@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { contentApi } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { Save, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Save, Loader2 } from 'lucide-react';
 
 export default function HeroEditor() {
   const [data, setData] = useState<any>(null);

@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+// For production, use /admin/api as base URL (PHP backend)
+// For development with Node.js backend, use /api
+const API_URL = import.meta.env.VITE_API_URL || '/admin/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -40,7 +42,7 @@ export default api;
 
 // Auth API
 export const authApi = {
-  login: (data: { username: string; password: string }) =>
+  login: (data: { email: string; password: string }) =>
     api.post('/auth/login', data),
   me: () => api.get('/auth/me'),
   updateProfile: (data: { full_name?: string; email?: string }) =>
@@ -99,14 +101,14 @@ export const uploadApi = {
   single: (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    return api.post('/upload/single', formData, {
+    return api.post('/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
   multiple: (files: File[]) => {
     const formData = new FormData();
     files.forEach((file) => formData.append('files', file));
-    return api.post('/upload/multiple', formData, {
+    return api.post('/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -19,7 +19,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      await login(username, password);
+      await login(email, password);
       navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Login failed. Please try again.');
@@ -70,14 +70,14 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-2">
-                Username or Email
+                Email
               </label>
               <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent transition-all"
-                placeholder="Enter your username"
+                placeholder="admin@hibiscusefsya.com"
                 required
               />
             </div>

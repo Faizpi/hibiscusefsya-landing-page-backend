@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   FileText,
   Users,
-  Mail,
   Settings,
   LogOut,
   Menu,
