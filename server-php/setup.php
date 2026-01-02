@@ -8,9 +8,9 @@ require_once __DIR__ . '/config.php';
 
 try {
     $pdo = getDB();
-    
+
     echo "Creating database tables...\n";
-    
+
     // Users table
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS users (
@@ -27,7 +27,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "✓ Users table created\n";
-    
+
     // Site settings table
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS site_settings (
@@ -39,7 +39,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "✓ Site settings table created\n";
-    
+
     // Hero content table
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS hero_content (
@@ -59,7 +59,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "✓ Hero content table created\n";
-    
+
     // About content table
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS about_content (
@@ -76,11 +76,27 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "✓ About content table created\n";
-    
+
+    // Service categories table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS service_categories (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(100) NOT NULL,
+            icon VARCHAR(50),
+            color VARCHAR(50),
+            bg_color VARCHAR(50),
+            sort_order INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+    echo "✓ Service categories table created\n";
+
     // Services table
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS services (
             id INT AUTO_INCREMENT PRIMARY KEY,
+            category_id INT,
             name VARCHAR(100) NOT NULL,
             description TEXT,
             icon VARCHAR(50),
@@ -90,11 +106,12 @@ try {
             is_active TINYINT(1) DEFAULT 1,
             sort_order INT DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (category_id) REFERENCES service_categories(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "✓ Services table created\n";
-    
+
     // Services section table
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS services_section (
@@ -108,7 +125,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "✓ Services section table created\n";
-    
+
     // Contact content table
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS contact_content (
@@ -125,7 +142,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "✓ Contact content table created\n";
-    
+
     // Footer content table
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS footer_content (
@@ -141,7 +158,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "✓ Footer content table created\n";
-    
+
     // Contact submissions table
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS contact_submissions (
@@ -156,7 +173,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "✓ Contact submissions table created\n";
-    
+
     // Activity logs table
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS activity_logs (
@@ -171,7 +188,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "✓ Activity logs table created\n";
-    
+
     // Media table
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS media (
@@ -187,7 +204,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "✓ Media table created\n";
-    
+
     // Create default admin user
     $adminPassword = password_hash('admin123', PASSWORD_DEFAULT);
     $stmt = $pdo->prepare("
@@ -196,21 +213,21 @@ try {
     ");
     $stmt->execute([$adminPassword]);
     echo "✓ Default admin user created (email: admin@hibiscusefsya.com, password: admin123)\n";
-    
+
     // Insert default hero content
     $pdo->exec("
         INSERT IGNORE INTO hero_content (id, badge_text, title, subtitle, description, primary_button_text, primary_button_link, secondary_button_text, secondary_button_link, stats) 
         VALUES (1, '🌺 Peluang Kemitraan & Franchise', 'Raih Kesuksesan Bersama Kami', 'Bisnis Terpercaya', 'Bergabunglah dengan jaringan franchise Hibiscus Efsya. Kami menyediakan sistem bisnis teruji, dukungan penuh, dan potensi keuntungan yang menjanjikan.', 'Daftar Franchise', '#contact', 'Pelajari Lebih Lanjut', '#services', '[{\"value\": \"4+\", \"label\": \"Unit Bisnis\"}, {\"value\": \"50+\", \"label\": \"Mitra Aktif\"}]')
     ");
     echo "✓ Default hero content inserted\n";
-    
+
     // Insert default about content
     $pdo->exec("
         INSERT IGNORE INTO about_content (id, section_title, section_subtitle, heading, description, features, stats) 
         VALUES (1, 'Tentang Kami', 'Kenali Lebih Dekat', 'Hibiscus Efsya', 'Kami adalah perusahaan yang bergerak di berbagai bidang usaha dengan fokus pada pengembangan kemitraan dan franchise yang menguntungkan.', '[{\"icon\": \"Shield\", \"title\": \"Sistem Teruji\", \"description\": \"Sistem bisnis yang sudah terbukti berhasil\"}, {\"icon\": \"Users\", \"title\": \"Dukungan Penuh\", \"description\": \"Tim support yang siap membantu 24/7\"}, {\"icon\": \"Zap\", \"title\": \"Proses Cepat\", \"description\": \"Proses pendaftaran dan setup yang cepat\"}, {\"icon\": \"Award\", \"title\": \"Brand Terpercaya\", \"description\": \"Brand yang sudah dikenal dan dipercaya\"}]', '[{\"value\": \"4+\", \"label\": \"Unit Bisnis\"}, {\"value\": \"50+\", \"label\": \"Mitra Aktif\"}, {\"value\": \"98%\", \"label\": \"Kepuasan Mitra\"}]')
     ");
     echo "✓ Default about content inserted\n";
-    
+
     // Insert default services
     $services = [
         ['Body Care', 'Produk perawatan tubuh berkualitas tinggi dengan bahan-bahan alami pilihan.', 'Sparkles', '', 'https://bodycare.hibiscusefsya.com', 0, 1, 1],
@@ -218,37 +235,37 @@ try {
         ['Fashion', 'Koleksi fashion terkini dengan desain modern dan kualitas premium.', 'Shirt', '', '', 1, 1, 3],
         ['Travel', 'Layanan perjalanan wisata dengan destinasi menarik dan harga terjangkau.', 'Plane', '', '', 1, 1, 4]
     ];
-    
+
     $stmt = $pdo->prepare("
         INSERT IGNORE INTO services (name, description, icon, image, link, is_coming_soon, is_active, sort_order) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    
+
     foreach ($services as $service) {
         $stmt->execute($service);
     }
     echo "✓ Default services inserted\n";
-    
+
     // Insert default services section
     $pdo->exec("
         INSERT IGNORE INTO services_section (id, section_title, section_subtitle, heading, description) 
         VALUES (1, 'Layanan Kami', 'Unit Bisnis', 'Peluang Kemitraan yang Tersedia', 'Pilih unit bisnis yang sesuai dengan minat dan modal Anda. Setiap unit bisnis dilengkapi dengan sistem operasional yang teruji.')
     ");
     echo "✓ Default services section inserted\n";
-    
+
     // Insert default contact content
     $pdo->exec("
         INSERT IGNORE INTO contact_content (id, section_title, section_subtitle, heading, description, contact_info, social_links) 
         VALUES (1, 'Hubungi Kami', 'Tertarik Bermitra?', 'Mari Diskusi', 'Hubungi kami untuk informasi lebih lanjut tentang peluang kemitraan dan franchise.', '{\"email\": \"info@hibiscusefsya.com\", \"phone\": \"+62 812 3456 7890\", \"address\": \"Jl. Contoh No. 123, Jakarta\"}', '{\"instagram\": \"https://instagram.com/hibiscusefsya\", \"facebook\": \"https://facebook.com/hibiscusefsya\", \"whatsapp\": \"https://wa.me/6281234567890\"}')
     ");
     echo "✓ Default contact content inserted\n";
-    
+
     echo "\n✅ Database setup completed successfully!\n";
     echo "\n📝 Admin Login:\n";
     echo "   Email: admin@hibiscusefsya.com\n";
     echo "   Password: admin123\n";
     echo "\n⚠️  Please change the admin password after first login!\n";
-    
+
 } catch (PDOException $e) {
     echo "❌ Error: " . $e->getMessage() . "\n";
     exit(1);

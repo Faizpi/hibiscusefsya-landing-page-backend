@@ -18,53 +18,53 @@ switch ($path) {
             handleLogin($input);
         }
         break;
-        
+
     case '/auth/me':
         if ($method === 'GET') {
             handleGetMe();
         }
         break;
-        
+
     case '/auth/logout':
         if ($method === 'POST') {
             jsonResponse(['message' => 'Logged out successfully']);
         }
         break;
-    
+
     // Content routes
     case '/content/hero':
         handleHeroContent($method, $input);
         break;
-        
+
     case '/content/about':
         handleAboutContent($method, $input);
         break;
-        
+
     case '/content/contact':
         handleContactContent($method, $input);
         break;
-    
+
     // Services routes
     case '/services':
         handleServices($method, $input);
         break;
-        
+
     case '/services/section':
         handleServicesSection($method, $input);
         break;
-    
+
     // Upload route
     case '/upload':
         if ($method === 'POST') {
             handleUpload();
         }
         break;
-        
+
     // Settings route
     case '/settings':
         handleSettings($method, $input);
         break;
-    
+
     default:
         // Check for service by ID
         if (preg_match('/\/services\/(\d+)/', $path, $matches)) {
@@ -75,62 +75,65 @@ switch ($path) {
 }
 
 // Auth handlers
-function handleLogin($input) {
+function handleLogin($input)
+{
     if (empty($input['email']) || empty($input['password'])) {
         errorResponse('Email and password required');
     }
-    
+
     $pdo = getDB();
     $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ? LIMIT 1');
     $stmt->execute([$input['email']]);
     $user = $stmt->fetch();
-    
+
     if (!$user || !password_verify($input['password'], $user['password'])) {
         errorResponse('Invalid email or password', 401);
     }
-    
+
     $token = createJWT([
         'id' => $user['id'],
         'email' => $user['email'],
         'role' => $user['role']
     ]);
-    
+
     unset($user['password']);
-    
+
     jsonResponse([
         'token' => $token,
         'user' => $user
     ]);
 }
 
-function handleGetMe() {
+function handleGetMe()
+{
     $auth = getAuthUser();
-    
+
     $pdo = getDB();
     $stmt = $pdo->prepare('SELECT id, username, email, full_name, role, avatar FROM users WHERE id = ?');
     $stmt->execute([$auth['id']]);
     $user = $stmt->fetch();
-    
+
     if (!$user) {
         errorResponse('User not found', 404);
     }
-    
+
     jsonResponse($user);
 }
 
 // Hero content handlers
-function handleHeroContent($method, $input) {
+function handleHeroContent($method, $input)
+{
     $pdo = getDB();
-    
+
     if ($method === 'GET') {
         $stmt = $pdo->query('SELECT * FROM hero_content WHERE id = 1');
         $data = $stmt->fetch();
         jsonResponse($data ?: []);
     }
-    
+
     if ($method === 'PUT') {
         getAuthUser();
-        
+
         $stmt = $pdo->prepare('
             INSERT INTO hero_content (id, badge_text, title, subtitle, description, primary_button_text, primary_button_link, 
                 secondary_button_text, secondary_button_link, background_image, stats)
@@ -148,7 +151,7 @@ function handleHeroContent($method, $input) {
                 stats = VALUES(stats),
                 updated_at = NOW()
         ');
-        
+
         $stmt->execute([
             $input['badge_text'] ?? '',
             $input['title'] ?? '',
@@ -161,15 +164,16 @@ function handleHeroContent($method, $input) {
             $input['background_image'] ?? '',
             json_encode($input['stats'] ?? [])
         ]);
-        
+
         jsonResponse(['message' => 'Hero content updated']);
     }
 }
 
 // About content handlers
-function handleAboutContent($method, $input) {
+function handleAboutContent($method, $input)
+{
     $pdo = getDB();
-    
+
     if ($method === 'GET') {
         $stmt = $pdo->query('SELECT * FROM about_content WHERE id = 1');
         $data = $stmt->fetch();
@@ -179,10 +183,10 @@ function handleAboutContent($method, $input) {
         }
         jsonResponse($data ?: []);
     }
-    
+
     if ($method === 'PUT') {
         getAuthUser();
-        
+
         $stmt = $pdo->prepare('
             INSERT INTO about_content (id, section_title, section_subtitle, heading, description, features, stats, image)
             VALUES (1, ?, ?, ?, ?, ?, ?, ?)
@@ -196,7 +200,7 @@ function handleAboutContent($method, $input) {
                 image = VALUES(image),
                 updated_at = NOW()
         ');
-        
+
         $stmt->execute([
             $input['section_title'] ?? '',
             $input['section_subtitle'] ?? '',
@@ -206,15 +210,16 @@ function handleAboutContent($method, $input) {
             json_encode($input['stats'] ?? []),
             $input['image'] ?? ''
         ]);
-        
+
         jsonResponse(['message' => 'About content updated']);
     }
 }
 
 // Contact content handlers
-function handleContactContent($method, $input) {
+function handleContactContent($method, $input)
+{
     $pdo = getDB();
-    
+
     if ($method === 'GET') {
         $stmt = $pdo->query('SELECT * FROM contact_content WHERE id = 1');
         $data = $stmt->fetch();
@@ -224,10 +229,10 @@ function handleContactContent($method, $input) {
         }
         jsonResponse($data ?: []);
     }
-    
+
     if ($method === 'PUT') {
         getAuthUser();
-        
+
         $stmt = $pdo->prepare('
             INSERT INTO contact_content (id, section_title, section_subtitle, heading, description, contact_info, social_links, map_embed)
             VALUES (1, ?, ?, ?, ?, ?, ?, ?)
@@ -241,7 +246,7 @@ function handleContactContent($method, $input) {
                 map_embed = VALUES(map_embed),
                 updated_at = NOW()
         ');
-        
+
         $stmt->execute([
             $input['section_title'] ?? '',
             $input['section_subtitle'] ?? '',
@@ -251,29 +256,30 @@ function handleContactContent($method, $input) {
             json_encode($input['social_links'] ?? []),
             $input['map_embed'] ?? ''
         ]);
-        
+
         jsonResponse(['message' => 'Contact content updated']);
     }
 }
 
 // Services handlers
-function handleServices($method, $input) {
+function handleServices($method, $input)
+{
     $pdo = getDB();
-    
+
     if ($method === 'GET') {
         $stmt = $pdo->query('SELECT * FROM services ORDER BY sort_order ASC');
         $data = $stmt->fetchAll();
         jsonResponse($data);
     }
-    
+
     if ($method === 'POST') {
         getAuthUser();
-        
+
         $stmt = $pdo->prepare('
             INSERT INTO services (name, description, icon, image, link, is_coming_soon, is_active, sort_order)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ');
-        
+
         $stmt->execute([
             $input['name'] ?? '',
             $input['description'] ?? '',
@@ -284,14 +290,15 @@ function handleServices($method, $input) {
             $input['is_active'] ?? 1,
             $input['sort_order'] ?? 0
         ]);
-        
+
         jsonResponse(['message' => 'Service created', 'id' => $pdo->lastInsertId()], 201);
     }
 }
 
-function handleServiceById($method, $input, $id) {
+function handleServiceById($method, $input, $id)
+{
     $pdo = getDB();
-    
+
     if ($method === 'GET') {
         $stmt = $pdo->prepare('SELECT * FROM services WHERE id = ?');
         $stmt->execute([$id]);
@@ -301,17 +308,17 @@ function handleServiceById($method, $input, $id) {
         }
         jsonResponse($data);
     }
-    
+
     if ($method === 'PUT') {
         getAuthUser();
-        
+
         $stmt = $pdo->prepare('
             UPDATE services SET 
                 name = ?, description = ?, icon = ?, image = ?, link = ?, 
                 is_coming_soon = ?, is_active = ?, sort_order = ?, updated_at = NOW()
             WHERE id = ?
         ');
-        
+
         $stmt->execute([
             $input['name'] ?? '',
             $input['description'] ?? '',
@@ -323,32 +330,33 @@ function handleServiceById($method, $input, $id) {
             $input['sort_order'] ?? 0,
             $id
         ]);
-        
+
         jsonResponse(['message' => 'Service updated']);
     }
-    
+
     if ($method === 'DELETE') {
         getAuthUser();
-        
+
         $stmt = $pdo->prepare('DELETE FROM services WHERE id = ?');
         $stmt->execute([$id]);
-        
+
         jsonResponse(['message' => 'Service deleted']);
     }
 }
 
-function handleServicesSection($method, $input) {
+function handleServicesSection($method, $input)
+{
     $pdo = getDB();
-    
+
     if ($method === 'GET') {
         $stmt = $pdo->query('SELECT * FROM services_section WHERE id = 1');
         $data = $stmt->fetch();
         jsonResponse($data ?: []);
     }
-    
+
     if ($method === 'PUT') {
         getAuthUser();
-        
+
         $stmt = $pdo->prepare('
             INSERT INTO services_section (id, section_title, section_subtitle, heading, description)
             VALUES (1, ?, ?, ?, ?)
@@ -359,53 +367,54 @@ function handleServicesSection($method, $input) {
                 description = VALUES(description),
                 updated_at = NOW()
         ');
-        
+
         $stmt->execute([
             $input['section_title'] ?? '',
             $input['section_subtitle'] ?? '',
             $input['heading'] ?? '',
             $input['description'] ?? ''
         ]);
-        
+
         jsonResponse(['message' => 'Services section updated']);
     }
 }
 
 // Upload handler
-function handleUpload() {
+function handleUpload()
+{
     getAuthUser();
-    
+
     if (!isset($_FILES['file'])) {
         errorResponse('No file uploaded');
     }
-    
+
     $file = $_FILES['file'];
     $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    
+
     if (!in_array($file['type'], $allowedTypes)) {
         errorResponse('Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.');
     }
-    
+
     $maxSize = 5 * 1024 * 1024; // 5MB
     if ($file['size'] > $maxSize) {
         errorResponse('File too large. Maximum size is 5MB.');
     }
-    
+
     $uploadDir = __DIR__ . '/../uploads/';
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0755, true);
     }
-    
+
     $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
     $filename = uniqid() . '_' . time() . '.' . $extension;
     $filepath = $uploadDir . $filename;
-    
+
     if (!move_uploaded_file($file['tmp_name'], $filepath)) {
         errorResponse('Failed to upload file', 500);
     }
-    
+
     $url = '/admin/uploads/' . $filename;
-    
+
     jsonResponse([
         'message' => 'File uploaded successfully',
         'url' => $url,
@@ -414,9 +423,10 @@ function handleUpload() {
 }
 
 // Settings handler
-function handleSettings($method, $input) {
+function handleSettings($method, $input)
+{
     $pdo = getDB();
-    
+
     if ($method === 'GET') {
         $stmt = $pdo->query('SELECT setting_key, setting_value FROM site_settings');
         $rows = $stmt->fetchAll();
@@ -426,10 +436,10 @@ function handleSettings($method, $input) {
         }
         jsonResponse($settings);
     }
-    
+
     if ($method === 'PUT') {
         getAuthUser();
-        
+
         foreach ($input as $key => $value) {
             $stmt = $pdo->prepare('
                 INSERT INTO site_settings (setting_key, setting_value)
@@ -438,7 +448,7 @@ function handleSettings($method, $input) {
             ');
             $stmt->execute([$key, $value]);
         }
-        
+
         jsonResponse(['message' => 'Settings updated']);
     }
 }

@@ -21,7 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // Database connection
-function getDB() {
+function getDB()
+{
     try {
         $pdo = new PDO(
             "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
@@ -42,83 +43,90 @@ function getDB() {
 }
 
 // JWT Functions
-function base64UrlEncode($data) {
+function base64UrlEncode($data)
+{
     return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
 }
 
-function base64UrlDecode($data) {
+function base64UrlDecode($data)
+{
     return base64_decode(strtr($data, '-_', '+/'));
 }
 
-function createJWT($payload) {
+function createJWT($payload)
+{
     $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
     $payload['exp'] = time() + (7 * 24 * 60 * 60); // 7 days
     $payload = json_encode($payload);
-    
+
     $headerEncoded = base64UrlEncode($header);
     $payloadEncoded = base64UrlEncode($payload);
-    
+
     $signature = hash_hmac('sha256', "$headerEncoded.$payloadEncoded", JWT_SECRET, true);
     $signatureEncoded = base64UrlEncode($signature);
-    
+
     return "$headerEncoded.$payloadEncoded.$signatureEncoded";
 }
 
-function verifyJWT($token) {
+function verifyJWT($token)
+{
     $parts = explode('.', $token);
     if (count($parts) !== 3) {
         return false;
     }
-    
+
     list($headerEncoded, $payloadEncoded, $signatureEncoded) = $parts;
-    
+
     $signature = hash_hmac('sha256', "$headerEncoded.$payloadEncoded", JWT_SECRET, true);
     $signatureCheck = base64UrlEncode($signature);
-    
+
     if ($signatureCheck !== $signatureEncoded) {
         return false;
     }
-    
+
     $payload = json_decode(base64UrlDecode($payloadEncoded), true);
-    
+
     if ($payload['exp'] < time()) {
         return false;
     }
-    
+
     return $payload;
 }
 
 // Get authenticated user
-function getAuthUser() {
+function getAuthUser()
+{
     $headers = getallheaders();
     $auth = isset($headers['Authorization']) ? $headers['Authorization'] : '';
-    
+
     if (strpos($auth, 'Bearer ') !== 0) {
         http_response_code(401);
         echo json_encode(['error' => 'No token provided']);
         exit();
     }
-    
+
     $token = substr($auth, 7);
     $payload = verifyJWT($token);
-    
+
     if (!$payload) {
         http_response_code(401);
         echo json_encode(['error' => 'Invalid or expired token']);
         exit();
     }
-    
+
     return $payload;
 }
 
 // Response helpers
-function jsonResponse($data, $status = 200) {
+function jsonResponse($data, $status = 200)
+{
     http_response_code($status);
     echo json_encode($data);
     exit();
 }
 
-function errorResponse($message, $status = 400) {
+function errorResponse($message, $status = 400)
+{
     http_response_code($status);
     echo json_encode(['error' => $message]);
     exit();
