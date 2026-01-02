@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 // For production, use /admin/api as base URL (PHP backend)
-// For development with Node.js backend, use /api
 const API_URL = import.meta.env.VITE_API_URL || '/admin/api';
 
 const api = axios.create({
@@ -45,55 +44,30 @@ export const authApi = {
   login: (data: { email: string; password: string }) =>
     api.post('/auth/login', data),
   me: () => api.get('/auth/me'),
-  updateProfile: (data: { full_name?: string; email?: string }) =>
-    api.put('/auth/profile', data),
-  changePassword: (data: { current_password: string; new_password: string }) =>
-    api.put('/auth/password', data),
   logout: () => api.post('/auth/logout'),
 };
 
-// Content API
+// Content API - Direct PHP endpoint calls
 export const contentApi = {
-  getAll: () => api.get('/content/all'),
-  getHero: () => api.get('/content/hero'),
-  updateHero: (data: any) => api.put('/content/hero', data),
-  getAbout: () => api.get('/content/about'),
-  updateAbout: (data: any) => api.put('/content/about', data),
-  getContact: () => api.get('/content/contact'),
-  updateContact: (data: any) => api.put('/content/contact', data),
-  getFooter: () => api.get('/content/footer'),
-  updateFooter: (data: any) => api.put('/content/footer', data),
+  getHero: () => api.get('/hero.php'),
+  updateHero: (data: any) => api.post('/hero.php', data),
+  getAbout: () => api.get('/about.php'),
+  updateAbout: (data: any) => api.post('/about.php', data),
+  getContact: () => api.get('/contact.php'),
+  updateContact: (data: any) => api.post('/contact.php', data),
 };
 
-// Services API
+// Services API - Direct PHP endpoint calls
 export const servicesApi = {
-  getSection: () => api.get('/services/section'),
-  updateSection: (data: any) => api.put('/services/section', data),
-  getAll: () => api.get('/services'),
-  getActive: () => api.get('/services/active'),
-  getOne: (id: number) => api.get(`/services/${id}`),
-  create: (data: any) => api.post('/services', data),
-  update: (id: number, data: any) => api.put(`/services/${id}`, data),
-  delete: (id: number) => api.delete(`/services/${id}`),
-  reorder: (orders: { id: number; display_order: number }[]) =>
-    api.put('/services/reorder', { orders }),
+  getAll: () => api.get('/services.php'),
+  updateAll: (categories: any[]) => api.post('/services.php', { action: 'update_all', categories }),
 };
 
-// Settings API
+// Settings API (placeholder - not connected yet)
 export const settingsApi = {
-  getAll: () => api.get('/settings'),
-  getByCategory: (category: string) => api.get(`/settings/category/${category}`),
-  get: (key: string) => api.get(`/settings/${key}`),
-  update: (key: string, data: any) => api.put(`/settings/${key}`, data),
-  bulkUpdate: (settings: any[]) => api.put('/settings', { settings }),
-  delete: (key: string) => api.delete(`/settings/${key}`),
-  getDashboardStats: () => api.get('/settings/dashboard/stats'),
-  getActivityLogs: (params?: { limit?: number; offset?: number }) =>
-    api.get('/settings/logs/activity', { params }),
-  getContactSubmissions: (params?: { limit?: number; offset?: number }) =>
-    api.get('/settings/submissions/contact', { params }),
-  markSubmissionRead: (id: number) =>
-    api.put(`/settings/submissions/contact/${id}/read`),
+  getDashboardStats: () => Promise.resolve({ data: { success: true, data: {} } }),
+  getActivityLogs: () => Promise.resolve({ data: { success: true, data: [] } }),
+  getContactSubmissions: () => Promise.resolve({ data: { success: true, data: [] } }),
 };
 
 // Upload API
@@ -101,18 +75,18 @@ export const uploadApi = {
   single: (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    return api.post('/upload', formData, {
+    return api.post('/upload.php', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
   multiple: (files: File[]) => {
     const formData = new FormData();
     files.forEach((file) => formData.append('files', file));
-    return api.post('/upload', formData, {
+    return api.post('/upload.php', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
   getAll: (params?: { limit?: number; offset?: number }) =>
-    api.get('/upload', { params }),
-  delete: (id: number) => api.delete(`/upload/${id}`),
+    api.get('/upload.php', { params }),
+  delete: (id: number) => api.delete(`/upload.php?id=${id}`),
 };
