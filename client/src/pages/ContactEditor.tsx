@@ -1,13 +1,29 @@
 import { useEffect, useState } from 'react';
 import { contentApi } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { Save, Loader2, FileText, Phone, Share2, CheckCircle, Mail, MapPin, MessageCircle } from 'lucide-react';
+import { Save, Loader2, CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react';
+
+// Default static data
+const defaultContactData = {
+  section_label: 'Kontak',
+  title: 'Hubungi',
+  title_highlight: 'Kami',
+  description: 'Tertarik untuk bermitra? Hubungi kami untuk informasi lebih lanjut.',
+  email: 'admin@hibiscusefsya.com',
+  phone: '+62 812 3456 7890',
+  whatsapp: '+6281234567890',
+  address: 'Jakarta, Indonesia',
+  instagram: 'https://instagram.com/hibiscusefsya',
+  linkedin: '',
+  twitter: '',
+};
 
 export default function ContactEditor() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<any>(defaultContactData);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState({ type: '', text: '' });
+  const [apiConnected, setApiConnected] = useState(true);
 
   useEffect(() => {
     fetchData();
@@ -16,9 +32,13 @@ export default function ContactEditor() {
   const fetchData = async () => {
     try {
       const response = await contentApi.getContact();
-      setData(response.data);
+      if (response.data && Object.keys(response.data).length > 0) {
+        setData(response.data);
+      }
+      setApiConnected(true);
     } catch (error) {
       console.error('Failed to fetch contact content:', error);
+      setApiConnected(false);
     } finally {
       setIsLoading(false);
     }
@@ -32,14 +52,14 @@ export default function ContactEditor() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    setMessage('');
+    setMessage({ type: '', text: '' });
 
     try {
       await contentApi.updateContact(data);
-      setMessage('Contact content saved successfully!');
-      setTimeout(() => setMessage(''), 3000);
+      setMessage({ type: 'success', text: 'Berhasil disimpan!' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
-      setMessage('Failed to save changes.');
+      setMessage({ type: 'error', text: 'Gagal menyimpan. Backend belum terhubung.' });
     } finally {
       setIsSaving(false);
     }
@@ -48,253 +68,196 @@ export default function ContactEditor() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        <Loader2 className="w-8 h-8 animate-spin text-red-600" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      {/* Success Message */}
-      {message && (
+    <div className="max-w-4xl space-y-6">
+      {/* Page Info */}
+      <div>
+        <h2 className="text-xl font-bold text-gray-900">Contact Section</h2>
+        <p className="text-gray-500">Edit informasi kontak dan social media.</p>
+      </div>
+
+      {/* API Connection Warning */}
+      {!apiConnected && (
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-700">
+          <AlertTriangle size={20} />
+          <div>
+            <p className="font-medium">Backend belum terhubung</p>
+            <p className="text-sm">Data ditampilkan dari template. Perubahan tidak akan tersimpan sampai database terhubung.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Message */}
+      {message.text && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium ${
-            message.includes('success')
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-              : 'bg-red-50 text-red-700 border border-red-200'
+          className={`flex items-center gap-3 p-4 rounded-xl ${
+            message.type === 'success' 
+              ? 'bg-green-50 border border-green-200 text-green-700' 
+              : 'bg-red-50 border border-red-200 text-red-700'
           }`}
         >
-          <CheckCircle className="w-5 h-5" />
-          {message}
+          {message.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+          {message.text}
         </motion.div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Section Content */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-xl bg-indigo-100">
-              <FileText className="w-5 h-5 text-indigo-600" />
-            </div>
+        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <h3 className="font-bold text-gray-900 mb-6">Section Content</h3>
+          
+          <div className="space-y-5">
             <div>
-              <h2 className="text-lg font-bold text-slate-800">Section Content</h2>
-              <p className="text-sm text-slate-500">Header untuk section contact</p>
-            </div>
-          </div>
-          <div className="grid gap-5">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Section Label
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Section Label</label>
               <input
                 type="text"
                 name="section_label"
                 value={data?.section_label || ''}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all"
               />
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Title
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
                 <input
                   type="text"
                   name="title"
                   value={data?.title || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Title Highlight
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Title Highlight</label>
                 <input
                   type="text"
                   name="title_highlight"
                   value={data?.title_highlight || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Description
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
               <textarea
                 name="description"
                 value={data?.description || ''}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all resize-none"
               />
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Contact Information */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-xl bg-emerald-100">
-              <Phone className="w-5 h-5 text-emerald-600" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-800">Contact Information</h2>
-              <p className="text-sm text-slate-500">Detail kontak perusahaan</p>
-            </div>
-          </div>
+        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <h3 className="font-bold text-gray-900 mb-6">Contact Information</h3>
+          
           <div className="grid md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-slate-400" />
-                  Email
-                </div>
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
               <input
                 type="email"
                 name="email"
                 value={data?.email || ''}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
-                placeholder="contact@example.com"
+                placeholder="contact@hibiscusefsya.com"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-slate-400" />
-                  Phone
-                </div>
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
               <input
                 type="text"
                 name="phone"
                 value={data?.phone || ''}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                 placeholder="+62 812 3456 7890"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="w-4 h-4 text-slate-400" />
-                  WhatsApp
-                </div>
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">WhatsApp</label>
               <input
                 type="text"
                 name="whatsapp"
                 value={data?.whatsapp || ''}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                 placeholder="+628123456789"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-slate-400" />
-                  Address
-                </div>
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
               <input
                 type="text"
                 name="address"
                 value={data?.address || ''}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                 placeholder="Jakarta, Indonesia"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all"
               />
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Social Media */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-xl bg-purple-100">
-              <Share2 className="w-5 h-5 text-purple-600" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-800">Social Media</h2>
-              <p className="text-sm text-slate-500">Link ke platform sosial media</p>
-            </div>
-          </div>
+        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <h3 className="font-bold text-gray-900 mb-6">Social Media</h3>
+          
           <div className="grid md:grid-cols-3 gap-5">
-            <div className="p-4 rounded-xl bg-pink-50 border border-pink-100">
-              <label className="block text-sm font-semibold text-pink-700 mb-3">
-                Instagram
-              </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Instagram</label>
               <input
                 type="text"
                 name="instagram"
                 value={data?.instagram || ''}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                 placeholder="https://instagram.com/..."
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all"
               />
             </div>
-            <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
-              <label className="block text-sm font-semibold text-blue-700 mb-3">
-                LinkedIn
-              </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">LinkedIn</label>
               <input
                 type="text"
                 name="linkedin"
                 value={data?.linkedin || ''}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                 placeholder="https://linkedin.com/..."
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all"
               />
             </div>
-            <div className="p-4 rounded-xl bg-slate-100 border border-slate-200">
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
-                Twitter / X
-              </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Twitter / X</label>
               <input
                 type="text"
                 name="twitter"
                 value={data?.twitter || ''}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                 placeholder="https://twitter.com/..."
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all"
               />
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Save Button */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="flex justify-end pt-4"
-        >
+        <div className="flex justify-end">
           <button
             type="submit"
             disabled={isSaving}
-            className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-indigo-600 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-indigo-500/30"
+            className="px-6 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             {isSaving ? (
               <>
@@ -308,7 +271,7 @@ export default function ContactEditor() {
               </>
             )}
           </button>
-        </motion.div>
+        </div>
       </form>
     </div>
   );
