@@ -43,6 +43,7 @@ npm run dev
 ```
 
 Server akan berjalan di:
+
 - Backend API: http://localhost:5000
 - Frontend: http://localhost:5173
 
@@ -79,12 +80,14 @@ npm start
 ## API Endpoints
 
 ### Auth
+
 - `POST /api/auth/login` - Login
 - `GET /api/auth/me` - Get current user
 - `PUT /api/auth/profile` - Update profile
 - `PUT /api/auth/password` - Change password
 
 ### Content
+
 - `GET /api/content/all` - Get all content
 - `GET/PUT /api/content/hero` - Hero section
 - `GET/PUT /api/content/about` - About section
@@ -92,12 +95,14 @@ npm start
 - `GET/PUT /api/content/footer` - Footer section
 
 ### Services
+
 - `GET /api/services` - Get all services
 - `POST /api/services` - Create service
 - `PUT /api/services/:id` - Update service
 - `DELETE /api/services/:id` - Delete service
 
 ### Upload
+
 - `POST /api/upload/single` - Upload single file
 - `POST /api/upload/multiple` - Upload multiple files
 - `DELETE /api/upload/:id` - Delete file
